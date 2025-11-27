@@ -1,0 +1,10 @@
+build/
+.vs/
+.cache/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.db
+*.opendb
+

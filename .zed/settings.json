@@ -1,0 +1,22 @@
+{
+  "languages": {
+    "C++": {
+      "language_servers": ["clangd"],
+      "tab_size": 4
+    }
+  },
+  "lsp": {
+    "clangd": {
+      "initialization_options": {
+        "compileCommandsDirectory": "${workspaceFolder}/build",
+        "fallbackFlags": [
+          "-std=c++20",
+          "-IC:/SFML-3.0.0/include",
+          "-IC:/msys64/ucrt64/include/c++/14.2.0",
+          "-IC:/msys64/ucrt64/include/c++/14.2.0/x86_64-w64-mingw32",
+          "-IC:/msys64/ucrt64/x86_64-w64-mingw32/include"
+        ]
+      }
+    }
+  }
+}

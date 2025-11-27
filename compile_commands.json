@@ -1,0 +1,8 @@
+[
+  {
+    "directory": "D:/Projects/SchoolXYZ/arcanoid-game/build",
+    "command": "C:\\msys64\\ucrt64\\bin\\c++.exe -std=gnu++20 -IC:/msys64/ucrt64/include -IC:/SFML-3.0.0/include -o CMakeFiles\\arcanoid-game.dir\\main.cpp.obj -c D:\\Projects\\SchoolXYZ\\arcanoid-game\\main.cpp",
+    "file": "D:/Projects/SchoolXYZ/arcanoid-game/main.cpp",
+    "output": "CMakeFiles/arcanoid-game.dir/main.cpp.obj"
+  }
+]

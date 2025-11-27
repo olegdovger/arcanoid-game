@@ -1,0 +1,46 @@
+[
+  {
+    "label": "Build",
+    "command": "cmd",
+    "args": ["/c", "scripts\\build.bat"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "group": "build",
+    "reveal": "always",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "show_command": true
+  },
+  {
+    "label": "Run",
+    "command": "cmd",
+    "args": ["/c", "scripts\\run.bat"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "group": "run",
+    "reveal": "always",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "show_command": true
+  },
+  {
+    "label": "Clean",
+    "command": "cmd",
+    "args": ["/c", "scripts\\clean.bat"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "group": "build",
+    "reveal": "always",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "show_command": true
+  },
+  {
+    "label": "Rebuild",
+    "command": "cmd",
+    "args": ["/c", "scripts\\rebuild.bat"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "group": "build",
+    "reveal": "always",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "show_command": true
+  }
+]
