@@ -109,6 +109,7 @@ add_executable(${PROJECT_NAME}
     src/Game.cpp
     src/GameState.cpp
     src/ECS/ECSManager.cpp
+    src/ECS/Systems/BallSpeedSystem.cpp
     src/ECS/Systems/InputSystem.cpp
     src/ECS/Systems/MovementSystem.cpp
     src/ECS/Systems/CollisionSystem.cpp
@@ -162,18 +163,52 @@ if(WIN32 AND NOT MSVC)
             # For static linking, copy DLLs to bin directory for runtime
             # Even with static linking, some DLLs might be needed at runtime
             if(SFML_BIN_DIR AND EXISTS "${SFML_BIN_DIR}")
-                # Copy all DLLs from SFML bin directory
-                file(GLOB SFML_DLLS "${SFML_BIN_DIR}/*.dll")
-                foreach(DLL ${SFML_DLLS})
-                    get_filename_component(DLL_NAME ${DLL} NAME)
-                    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                            "${DLL}"
-                            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                        COMMENT "Copying ${DLL_NAME}..."
-                    )
+                # Explicitly list DLLs to avoid GLOB causing CMake regeneration
+                set(SFML_DLL_LIST
+                    "sfml-system-3.dll"
+                    "sfml-window-3.dll"
+                    "sfml-graphics-3.dll"
+                    "sfml-audio-3.dll"
+                    "sfml-network-3.dll"
+                )
+                foreach(DLL_NAME ${SFML_DLL_LIST})
+                    set(DLL_PATH "${SFML_BIN_DIR}/${DLL_NAME}")
+                    if(EXISTS "${DLL_PATH}")
+                        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                                "${DLL_PATH}"
+                                $<TARGET_FILE_DIR:${PROJECT_NAME}>
+                            COMMENT "Copying ${DLL_NAME}..."
+                        )
+                    endif()
                 endforeach()
             endif()
+
+            # Copy MinGW64 runtime DLLs
+            set(MINGW_PATHS "C:/msys64/ucrt64" "C:/msys64/mingw64")
+            foreach(MINGW_PATH ${MINGW_PATHS})
+                if(EXISTS "${MINGW_PATH}/bin")
+                    set(MINGW_BIN_DIR "${MINGW_PATH}")
+                    set(MINGW_DLLS
+                        "libwinpthread-1.dll"
+                        "libgcc_s_seh-1.dll"
+                        "libstdc++-6.dll"
+                    )
+
+                    foreach(DLL_NAME ${MINGW_DLLS})
+                        set(DLL_PATH "${MINGW_BIN_DIR}/bin/${DLL_NAME}")
+                        if(EXISTS "${DLL_PATH}")
+                            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                                    "${DLL_PATH}"
+                                    $<TARGET_FILE_DIR:${PROJECT_NAME}>
+                                COMMENT "Copying ${DLL_NAME} from MinGW64..."
+                            )
+                        endif()
+                    endforeach()
+                    break()
+                endif()
+            endforeach()
         else()
             # Find SFML bin directory for dynamic linking
             set(SFML_BIN_DIR "")
@@ -184,28 +219,52 @@ if(WIN32 AND NOT MSVC)
             endif()
 
             if(SFML_BIN_DIR AND EXISTS "${SFML_BIN_DIR}")
-                # Copy main SFML DLLs
-                add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        "${SFML_BIN_DIR}/sfml-system-3.dll"
-                        "${SFML_BIN_DIR}/sfml-window-3.dll"
-                        "${SFML_BIN_DIR}/sfml-graphics-3.dll"
-                        $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                    COMMENT "Copying SFML DLLs..."
+                # Explicitly list DLLs to avoid GLOB causing CMake regeneration
+                set(SFML_DLL_LIST
+                    "sfml-system-3.dll"
+                    "sfml-window-3.dll"
+                    "sfml-graphics-3.dll"
+                    "sfml-audio-3.dll"
+                    "sfml-network-3.dll"
                 )
-
-                # Copy all DLLs from SFML bin directory (for dependencies)
-                file(GLOB SFML_DLLS "${SFML_BIN_DIR}/*.dll")
-                foreach(DLL ${SFML_DLLS})
-                    get_filename_component(DLL_NAME ${DLL} NAME)
-                    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                            "${DLL}"
-                            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                        COMMENT "Copying ${DLL_NAME}..."
-                    )
+                foreach(DLL_NAME ${SFML_DLL_LIST})
+                    set(DLL_PATH "${SFML_BIN_DIR}/${DLL_NAME}")
+                    if(EXISTS "${DLL_PATH}")
+                        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                                "${DLL_PATH}"
+                                $<TARGET_FILE_DIR:${PROJECT_NAME}>
+                            COMMENT "Copying ${DLL_NAME}..."
+                        )
+                    endif()
                 endforeach()
             endif()
+
+            # Copy MinGW64 runtime DLLs
+            set(MINGW_PATHS "C:/msys64/ucrt64" "C:/msys64/mingw64")
+            foreach(MINGW_PATH ${MINGW_PATHS})
+                if(EXISTS "${MINGW_PATH}/bin")
+                    set(MINGW_BIN_DIR "${MINGW_PATH}")
+                    set(MINGW_DLLS
+                        "libwinpthread-1.dll"
+                        "libgcc_s_seh-1.dll"
+                        "libstdc++-6.dll"
+                    )
+
+                    foreach(DLL_NAME ${MINGW_DLLS})
+                        set(DLL_PATH "${MINGW_BIN_DIR}/bin/${DLL_NAME}")
+                        if(EXISTS "${DLL_PATH}")
+                            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                                    "${DLL_PATH}"
+                                    $<TARGET_FILE_DIR:${PROJECT_NAME}>
+                                COMMENT "Copying ${DLL_NAME} from MinGW64..."
+                            )
+                        endif()
+                    endforeach()
+                    break()
+                endif()
+            endforeach()
         endif()
     endif()
 elseif(WIN32 AND MSVC)
@@ -218,26 +277,24 @@ elseif(WIN32 AND MSVC)
     endif()
 
     if(SFML_BIN_DIR AND EXISTS "${SFML_BIN_DIR}")
-        # Copy main SFML DLLs
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${SFML_BIN_DIR}/sfml-system-3.dll"
-                "${SFML_BIN_DIR}/sfml-window-3.dll"
-                "${SFML_BIN_DIR}/sfml-graphics-3.dll"
-                $<TARGET_FILE_DIR:${PROJECT_NAME}>
-            COMMENT "Copying SFML DLLs..."
+        # Explicitly list DLLs to avoid GLOB causing CMake regeneration
+        set(SFML_DLL_LIST
+            "sfml-system-3.dll"
+            "sfml-window-3.dll"
+            "sfml-graphics-3.dll"
+            "sfml-audio-3.dll"
+            "sfml-network-3.dll"
         )
-
-        # Copy all DLLs from SFML bin directory (for dependencies)
-        file(GLOB SFML_DLLS "${SFML_BIN_DIR}/*.dll")
-        foreach(DLL ${SFML_DLLS})
-            get_filename_component(DLL_NAME ${DLL} NAME)
-            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${DLL}"
-                    $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                COMMENT "Copying ${DLL_NAME}..."
-            )
+        foreach(DLL_NAME ${SFML_DLL_LIST})
+            set(DLL_PATH "${SFML_BIN_DIR}/${DLL_NAME}")
+            if(EXISTS "${DLL_PATH}")
+                add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "${DLL_PATH}"
+                        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+                    COMMENT "Copying ${DLL_NAME}..."
+                )
+            endif()
         endforeach()
     endif()
 endif()
