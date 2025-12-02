@@ -126,6 +126,70 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
             }
         }
     }
+
+    if (ballEntity != INVALID_ENTITY)
+    {
+        auto ballPos = ecs.getComponent<PositionComponent>(ballEntity);
+        auto ballCollider = ecs.getComponent<ColliderComponent>(ballEntity);
+        auto ballVelocity = ecs.getComponent<VelocityComponent>(ballEntity);
+
+        if (ballPos && ballCollider && ballVelocity)
+        {
+            float ballRadius = ballCollider->radius;
+            std::vector<Entity> bricksToDestroy;
+
+            for (Entity entity : entities)
+            {
+                auto collider = ecs.getComponent<ColliderComponent>(entity);
+                if (collider && collider->type == ColliderComponent::Type::Brick)
+                {
+                    auto brickPos = ecs.getComponent<PositionComponent>(entity);
+                    if (brickPos)
+                    {
+                        sf::Vector2f brickSize = collider->size;
+
+                        bool colliding = (ballPos->position.x + ballRadius > brickPos->position.x &&
+                                         ballPos->position.x - ballRadius < brickPos->position.x + brickSize.x &&
+                                         ballPos->position.y + ballRadius > brickPos->position.y &&
+                                         ballPos->position.y - ballRadius < brickPos->position.y + brickSize.y);
+
+                        if (colliding)
+                        {
+                            float ballCenterX = ballPos->position.x;
+                            float ballCenterY = ballPos->position.y;
+                            float brickLeft = brickPos->position.x;
+                            float brickRight = brickPos->position.x + brickSize.x;
+                            float brickTop = brickPos->position.y;
+                            float brickBottom = brickPos->position.y + brickSize.y;
+
+                            float distLeft = std::abs(ballCenterX - brickLeft);
+                            float distRight = std::abs(ballCenterX - brickRight);
+                            float distTop = std::abs(ballCenterY - brickTop);
+                            float distBottom = std::abs(ballCenterY - brickBottom);
+
+                            float minDist = std::min({distLeft, distRight, distTop, distBottom});
+
+                            if (minDist == distLeft || minDist == distRight)
+                            {
+                                ballVelocity->velocity.x = -ballVelocity->velocity.x;
+                            }
+                            else
+                            {
+                                ballVelocity->velocity.y = -ballVelocity->velocity.y;
+                            }
+
+                            bricksToDestroy.push_back(entity);
+                        }
+                    }
+                }
+            }
+
+            for (Entity brick : bricksToDestroy)
+            {
+                ecs.destroyEntity(brick);
+            }
+        }
+    }
 }
 
 bool CollisionSystem::isBallOutOfBounds(Entity ballEntity, ECSManager& ecs) const
@@ -136,7 +200,6 @@ bool CollisionSystem::isBallOutOfBounds(Entity ballEntity, ECSManager& ecs) cons
     if (!ballPos || !ballCollider) return false;
 
     float radius = ballCollider->radius;
-    // Ball is out if it goes below the window
+
     return (ballPos->position.y - radius > static_cast<float>(GameState::WINDOW_HEIGHT));
 }
-
