@@ -7,10 +7,15 @@
 #include "ECS/Systems/CollisionSystem.h"
 #include "ECS/Systems/RenderSystem.h"
 #include "ECS/Systems/ResizeSystem.h"
-#include "ECS/Components.h"
-#include "EntityFactory.h"
-#include "GameState.h"
+#include "ECS/Systems/BallSpeedSystem.h"
 #include <memory>
+
+enum class GameMode
+{
+    Playing,
+    Victory,
+    MainMenu,
+};
 
 class Game
 {
@@ -19,12 +24,17 @@ public:
     ~Game() = default;
 
     void run();
-    bool isWindowOpen() const { return window.isOpen(); }
 
 private:
     void handleEvents();
     void update(float deltaTime);
     void render();
+    void renderVictoryScreen();
+    void renderMainMenuScreen();
+    int countRemainingBricks();
+    void resetGame();
+    void exitToMenu();
+    void initializeGameObjects();
 
     sf::RenderWindow window;
     ECSManager ecs;
@@ -34,12 +44,16 @@ private:
     std::shared_ptr<CollisionSystem> collisionSystem;
     std::shared_ptr<RenderSystem> renderSystem;
     std::shared_ptr<ResizeSystem> resizeSystem;
+    std::shared_ptr<BallSpeedSystem> ballSpeedSystem;
 
     Entity platform;
     Entity ball;
+    std::vector<Entity> bricks;
 
     sf::Clock clock;
     sf::Clock restartTimer;
     bool isRestarting = false;
+    GameMode gameMode = GameMode::MainMenu;
+    bool victoryChoiceYes = true; // true = да, false = нет
+    sf::Font font;
 };
-
