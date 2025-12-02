@@ -66,7 +66,8 @@ struct ColliderComponent : public Component
     {
         Platform,
         Ball,
-        Wall
+        Wall,
+        Brick
     };
 
     Type type;

@@ -29,4 +29,9 @@ struct GameState
     static constexpr float BALL_RADIUS = 10.0f;
     static constexpr float BALL_INITIAL_VELOCITY_X = 200.0f;
     static constexpr float BALL_INITIAL_VELOCITY_Y = -200.0f;
+
+    // Ball speed increase settings
+    static constexpr float BALL_SPEED_INCREASE_INTERVAL = 10.0f; // Increase speed every 10 seconds
+    static constexpr float BALL_SPEED_MULTIPLIER = 1.2f; // Multiply speed by this factor
+    static constexpr float BALL_MAX_SPEED_MULTIPLIER = 3.0f; // Maximum speed multiplier
 };
