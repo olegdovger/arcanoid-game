@@ -16,8 +16,8 @@ void RenderSystem::update(float deltaTime, ECSManager& ecs)
 
     // Ensure view is set correctly (fixed size to prevent stretching)
     sf::View view;
-    view.setSize({static_cast<float>(GameState::WINDOW_WIDTH), static_cast<float>(GameState::WINDOW_HEIGHT)});
-    view.setCenter({static_cast<float>(GameState::WINDOW_WIDTH) / 2.0f, static_cast<float>(GameState::WINDOW_HEIGHT) / 2.0f});
+    view.setSize({static_cast<float>(GAME_STATE.WINDOW_WIDTH), static_cast<float>(GAME_STATE.WINDOW_HEIGHT)});
+    view.setCenter({static_cast<float>(GAME_STATE.WINDOW_WIDTH) / 2.0f, static_cast<float>(GAME_STATE.WINDOW_HEIGHT) / 2.0f});
     window->setView(view);
 
     // Get all entities with Position and Shape components
@@ -50,7 +50,7 @@ void RenderSystem::update(float deltaTime, ECSManager& ecs)
                     rect.setOutlineThickness(2.0f);
                 }
             }
-            
+
             window->draw(rect);
         }
         else if (shape->type == ShapeComponent::Type::Circle)
@@ -65,4 +65,3 @@ void RenderSystem::update(float deltaTime, ECSManager& ecs)
         }
     }
 }
-

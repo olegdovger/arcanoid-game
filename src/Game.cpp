@@ -2,11 +2,11 @@
 #include <random>
 #include <stdexcept>
 
+#include "GameState.h"
 #include "ECS/Components.h"
 #include "ECS/Systems/BallSpeedSystem.h"
 #include "EntityFactory.h"
 #include "Game.h"
-#include "GameState.h"
 #include "SFML/Graphics/RectangleShape.hpp"
 #include "SFML/System/Vector2.hpp"
 
@@ -23,20 +23,20 @@ EventType getEventType(const sf::Event &event) {
 }
 
 Game::Game()
-    : window(sf::VideoMode({GameState::WINDOW_WIDTH, GameState::WINDOW_HEIGHT}),
-             GameState::WINDOW_TITLE) {
+    : window(sf::VideoMode({GAME_STATE.WINDOW_WIDTH, GAME_STATE.WINDOW_HEIGHT}),
+             GAME_STATE.WINDOW_TITLE) {
   if (!window.isOpen()) {
     throw std::runtime_error("Failed to create window");
   }
 
-  window.setFramerateLimit(GameState::TARGET_FPS);
+  window.setFramerateLimit(GAME_STATE.TARGET_FPS);
 
   // Set fixed view to prevent stretching when window is resized
   sf::View view;
-  view.setSize({static_cast<float>(GameState::WINDOW_WIDTH),
-                static_cast<float>(GameState::WINDOW_HEIGHT)});
-  view.setCenter({static_cast<float>(GameState::WINDOW_WIDTH) / 2.0f,
-                  static_cast<float>(GameState::WINDOW_HEIGHT) / 2.0f});
+  view.setSize({static_cast<float>(GAME_STATE.WINDOW_WIDTH),
+                static_cast<float>(GAME_STATE.WINDOW_HEIGHT)});
+  view.setCenter({static_cast<float>(GAME_STATE.WINDOW_WIDTH) / 2.0f,
+                  static_cast<float>(GAME_STATE.WINDOW_HEIGHT) / 2.0f});
   window.setView(view);
 
   // Create systems
@@ -94,22 +94,22 @@ void Game::run() {
     // Handle restart pause
     if (isRestarting) {
       if (restartTimer.getElapsedTime().asSeconds() >=
-          GameState::RESTART_PAUSE_TIME_SECONDS) {
+          GAME_STATE.RESTART_PAUSE_TIME_SECONDS) {
         // Reset positions
         auto platformPos = ecs.getComponent<PositionComponent>(platform);
         auto ballPos = ecs.getComponent<PositionComponent>(ball);
         auto ballVelocity = ecs.getComponent<VelocityComponent>(ball);
 
         if (platformPos) {
-          platformPos->position.x = GameState::PLATFORM_START_X;
-          platformPos->position.y = GameState::PLATFORM_START_Y;
+          platformPos->position.x = GAME_STATE.PLATFORM_START_X;
+          platformPos->position.y = GAME_STATE.PLATFORM_START_Y;
         }
 
         if (ballPos && ballVelocity) {
-          ballPos->position.x = GameState::BALL_START_X;
-          ballPos->position.y = GameState::BALL_START_Y;
-          ballVelocity->velocity = {GameState::BALL_INITIAL_VELOCITY_X,
-                                    GameState::BALL_INITIAL_VELOCITY_Y};
+          ballPos->position.x = GAME_STATE.BALL_START_X;
+          ballPos->position.y = GAME_STATE.BALL_START_Y;
+          ballVelocity->velocity = {GAME_STATE.BALL_INITIAL_VELOCITY_X,
+                                    GAME_STATE.BALL_INITIAL_VELOCITY_Y};
           // Recalculate speed
           ballVelocity->speed =
               std::sqrt(ballVelocity->velocity.x * ballVelocity->velocity.x +
@@ -138,8 +138,8 @@ void Game::run() {
 
     // Optional: Sleep to maintain consistent frame rate if needed
     float elapsed = clock.getElapsedTime().asSeconds();
-    if (elapsed < GameState::FRAME_TIME) {
-      sf::sleep(sf::seconds(GameState::FRAME_TIME - elapsed));
+    if (elapsed < GAME_STATE.FRAME_TIME) {
+      sf::sleep(sf::seconds(GAME_STATE.FRAME_TIME - elapsed));
     }
   }
 }
@@ -249,13 +249,13 @@ void Game::resetGame() {
 void Game::initializeGameObjects() {
   // Create platform
   platform = EntityFactory::createPlatform(
-      ecs, GameState::PLATFORM_START_X, GameState::PLATFORM_START_Y,
-      GameState::PLATFORM_WIDTH, GameState::PLATFORM_HEIGHT);
+      ecs, GAME_STATE.PLATFORM_START_X, GAME_STATE.PLATFORM_START_Y,
+      GAME_STATE.PLATFORM_WIDTH, GAME_STATE.PLATFORM_HEIGHT);
 
   // Create ball
-  ball = EntityFactory::createBall(ecs, GameState::BALL_START_X,
-                                   GameState::BALL_START_Y,
-                                   GameState::BALL_RADIUS);
+  ball = EntityFactory::createBall(ecs, GAME_STATE.BALL_START_X,
+                                   GAME_STATE.BALL_START_Y,
+                                   GAME_STATE.BALL_RADIUS);
 
   recreateBricks();
 }
@@ -282,7 +282,7 @@ void Game::recreateBricks() {
     for (int col = 0; col < cols; ++col) {
       float x = startX + col * (brickWidth + brickSpacing);
       float y = startY + row * (brickHeight + brickSpacing);
-      
+
       static std::random_device rd;
       static std::mt19937 gen(rd());
       static std::uniform_int_distribution<int> dis(1, 3);
@@ -318,7 +318,7 @@ void Game::exitToMenu() {
 void Game::renderVictoryScreen() {
   sf::RectangleShape overlay;
   overlay.setSize(
-      sf::Vector2f(GameState::WINDOW_WIDTH, GameState::WINDOW_HEIGHT));
+      sf::Vector2f(GAME_STATE.WINDOW_WIDTH, GAME_STATE.WINDOW_HEIGHT));
   overlay.setFillColor(sf::Color(0, 0, 0, 200));
   window.draw(overlay);
 
@@ -335,7 +335,7 @@ void Game::renderVictoryScreen() {
       congratsText.setStyle(sf::Text::Bold);
       sf::FloatRect congratsBounds = congratsText.getLocalBounds();
       congratsText.setPosition(
-          {(GameState::WINDOW_WIDTH - congratsBounds.position.x -
+          {(GAME_STATE.WINDOW_WIDTH - congratsBounds.position.x -
             congratsBounds.size.x) /
                2.0f,
            150.0f});
@@ -349,7 +349,7 @@ void Game::renderVictoryScreen() {
       questionText.setFillColor(sf::Color::White);
       sf::FloatRect questionBounds = questionText.getLocalBounds();
       questionText.setPosition(
-          {(GameState::WINDOW_WIDTH - questionBounds.position.x -
+          {(GAME_STATE.WINDOW_WIDTH - questionBounds.position.x -
             questionBounds.size.x) /
                2.0f,
            250.0f});
@@ -363,7 +363,7 @@ void Game::renderVictoryScreen() {
       yesText.setStyle(victoryChoiceYes ? sf::Text::Bold : sf::Text::Regular);
       sf::FloatRect yesBounds = yesText.getLocalBounds();
       yesText.setPosition(
-          {(GameState::WINDOW_WIDTH - yesBounds.position.x - yesBounds.size.x) /
+          {(GAME_STATE.WINDOW_WIDTH - yesBounds.position.x - yesBounds.size.x) /
                    2.0f -
                80.0f,
            350.0f});
@@ -377,7 +377,7 @@ void Game::renderVictoryScreen() {
       noText.setStyle(!victoryChoiceYes ? sf::Text::Bold : sf::Text::Regular);
       sf::FloatRect noBounds = noText.getLocalBounds();
       noText.setPosition(
-          {(GameState::WINDOW_WIDTH - noBounds.position.x - noBounds.size.x) /
+          {(GAME_STATE.WINDOW_WIDTH - noBounds.position.x - noBounds.size.x) /
                    2.0f +
                80.0f,
            350.0f});
@@ -390,7 +390,7 @@ void Game::renderVictoryScreen() {
       instructionsText.setFillColor(sf::Color(200, 200, 200));
       sf::FloatRect instBounds = instructionsText.getLocalBounds();
       instructionsText.setPosition(
-          {(GameState::WINDOW_WIDTH - instBounds.position.x -
+          {(GAME_STATE.WINDOW_WIDTH - instBounds.position.x -
             instBounds.size.x) /
                2.0f,
            450.0f});
@@ -405,7 +405,7 @@ void Game::renderMainMenuScreen() {
   sf::RectangleShape overlay;
 
   overlay.setSize(
-      sf::Vector2f(GameState::WINDOW_WIDTH, GameState::WINDOW_HEIGHT));
+      sf::Vector2f(GAME_STATE.WINDOW_WIDTH, GAME_STATE.WINDOW_HEIGHT));
   overlay.setFillColor(sf::Color(0, 0, 0, 200));
   window.draw(overlay);
 
@@ -415,7 +415,7 @@ void Game::renderMainMenuScreen() {
   gameTitleText.setFillColor(sf::Color(255, 255, 255));
   sf::FloatRect titleBounds = gameTitleText.getLocalBounds();
   gameTitleText.setPosition(
-      {(GameState::WINDOW_WIDTH - titleBounds.position.x - titleBounds.size.x) /
+      {(GAME_STATE.WINDOW_WIDTH - titleBounds.position.x - titleBounds.size.x) /
            2.0f,
        200.0f});
   window.draw(gameTitleText);
@@ -426,7 +426,7 @@ void Game::renderMainMenuScreen() {
   instructionsText.setFillColor(sf::Color(200, 200, 200));
   sf::FloatRect instBounds = instructionsText.getLocalBounds();
   instructionsText.setPosition(
-      {(GameState::WINDOW_WIDTH - instBounds.position.x - instBounds.size.x) /
+      {(GAME_STATE.WINDOW_WIDTH - instBounds.position.x - instBounds.size.x) /
            2.0f,
        450.0f});
   window.draw(instructionsText);

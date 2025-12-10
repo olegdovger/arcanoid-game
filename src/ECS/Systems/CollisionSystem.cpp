@@ -32,9 +32,9 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
             }
 
             // Right wall
-            if (position->position.x + radius > static_cast<float>(GameState::WINDOW_WIDTH))
+            if (position->position.x + radius > static_cast<float>(GAME_STATE.WINDOW_WIDTH))
             {
-                position->position.x = static_cast<float>(GameState::WINDOW_WIDTH) - radius;
+                position->position.x = static_cast<float>(GAME_STATE.WINDOW_WIDTH) - radius;
                 velocity->velocity.x = -velocity->velocity.x;
             }
 
@@ -52,8 +52,8 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
             float platformWidth = collider->size.x;
             if (position->position.x < 0.0f)
                 position->position.x = 0.0f;
-            if (position->position.x + platformWidth > static_cast<float>(GameState::WINDOW_WIDTH))
-                position->position.x = static_cast<float>(GameState::WINDOW_WIDTH) - platformWidth;
+            if (position->position.x + platformWidth > static_cast<float>(GAME_STATE.WINDOW_WIDTH))
+                position->position.x = static_cast<float>(GAME_STATE.WINDOW_WIDTH) - platformWidth;
         }
     }
 
@@ -243,5 +243,5 @@ bool CollisionSystem::isBallOutOfBounds(Entity ballEntity, ECSManager& ecs) cons
 
     float radius = ballCollider->radius;
 
-    return (ballPos->position.y - radius > static_cast<float>(GameState::WINDOW_HEIGHT));
+    return (ballPos->position.y - radius > static_cast<float>(GAME_STATE.WINDOW_HEIGHT));
 }
