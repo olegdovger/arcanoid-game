@@ -9,6 +9,6 @@ class EntityFactory
 public:
     static Entity createPlatform(ECSManager& ecs, float x, float y, float width, float height);
     static Entity createBall(ECSManager& ecs, float x, float y, float radius);
-    static Entity createBrick(ECSManager& ecs, float x, float y, float width, float height, sf::Color color = sf::Color::Red);
+    static Entity createBrick(ECSManager& ecs, float x, float y, float width, float height, sf::Color color = sf::Color::Red, int hitPoints = 1);
 };
 

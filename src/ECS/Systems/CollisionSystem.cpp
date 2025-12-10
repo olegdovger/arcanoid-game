@@ -3,6 +3,7 @@
 #include "../Components.h"
 #include "../Entity.h"
 #include "../../GameState.h"
+#include <cstdint>
 #include <cmath>
 
 void CollisionSystem::update(float deltaTime, ECSManager& ecs)
@@ -137,6 +138,7 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
         {
             float ballRadius = ballCollider->radius;
             std::vector<Entity> bricksToDestroy;
+            bool ballCollisionHandled = false;
 
             for (Entity entity : entities)
             {
@@ -155,30 +157,70 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
 
                         if (colliding)
                         {
-                            float ballCenterX = ballPos->position.x;
-                            float ballCenterY = ballPos->position.y;
-                            float brickLeft = brickPos->position.x;
-                            float brickRight = brickPos->position.x + brickSize.x;
-                            float brickTop = brickPos->position.y;
-                            float brickBottom = brickPos->position.y + brickSize.y;
 
-                            float distLeft = std::abs(ballCenterX - brickLeft);
-                            float distRight = std::abs(ballCenterX - brickRight);
-                            float distTop = std::abs(ballCenterY - brickTop);
-                            float distBottom = std::abs(ballCenterY - brickBottom);
-
-                            float minDist = std::min({distLeft, distRight, distTop, distBottom});
-
-                            if (minDist == distLeft || minDist == distRight)
+                            if (!ballCollisionHandled)
                             {
-                                ballVelocity->velocity.x = -ballVelocity->velocity.x;
-                            }
-                            else
-                            {
-                                ballVelocity->velocity.y = -ballVelocity->velocity.y;
+                                float ballCenterX = ballPos->position.x;
+                                float ballCenterY = ballPos->position.y;
+                                float brickLeft = brickPos->position.x;
+                                float brickRight = brickPos->position.x + brickSize.x;
+                                float brickTop = brickPos->position.y;
+                                float brickBottom = brickPos->position.y + brickSize.y;
+
+                                float distLeft = std::abs(ballCenterX - brickLeft);
+                                float distRight = std::abs(ballCenterX - brickRight);
+                                float distTop = std::abs(ballCenterY - brickTop);
+                                float distBottom = std::abs(ballCenterY - brickBottom);
+
+                                float minDist = std::min({distLeft, distRight, distTop, distBottom});
+
+                                if (minDist == distLeft)
+                                {
+                                    ballVelocity->velocity.x = -ballVelocity->velocity.x;
+                                    ballPos->position.x = brickLeft - ballRadius;
+                                }
+                                else if (minDist == distRight)
+                                {
+                                    ballVelocity->velocity.x = -ballVelocity->velocity.x;
+                                    ballPos->position.x = brickRight + ballRadius;
+                                }
+                                else if (minDist == distTop)
+                                {
+                                    ballVelocity->velocity.y = -ballVelocity->velocity.y;
+                                    ballPos->position.y = brickTop - ballRadius;
+                                }
+                                else
+                                {
+                                    ballVelocity->velocity.y = -ballVelocity->velocity.y;
+                                    ballPos->position.y = brickBottom + ballRadius;
+                                }
+
+                                ballCollisionHandled = true;
                             }
 
-                            bricksToDestroy.push_back(entity);
+
+                            auto destructible = ecs.getComponent<DestructibleComponent>(entity);
+                            if (destructible) {
+                                destructible->takeHit();
+
+                                auto shape = ecs.getComponent<ShapeComponent>(entity);
+                                if (shape) {
+                                    float healthPercentage = destructible->getHealthPercentage();
+                                    sf::Color originalColor = shape->color;
+
+                                    shape->color = sf::Color(
+                                        static_cast<std::uint8_t>(originalColor.r * healthPercentage),
+                                        static_cast<std::uint8_t>(originalColor.g * healthPercentage),
+                                        static_cast<std::uint8_t>(originalColor.b * healthPercentage)
+                                    );
+                                }
+
+                                if (destructible->isDestroyed()) {
+                                    bricksToDestroy.push_back(entity);
+                                }
+                            } else {
+                                bricksToDestroy.push_back(entity);
+                            }
                         }
                     }
                 }

@@ -89,3 +89,25 @@ struct InputComponent : public Component
     float moveSpeed = 400.0f;
 };
 
+struct DestructibleComponent : public Component
+{
+    int maxHits = 1;
+    int currentHits = 0;
+    
+    DestructibleComponent(int hits = 1) : maxHits(hits), currentHits(0) {}
+    
+    bool isDestroyed() const {
+        return currentHits >= maxHits;
+    }
+    
+    void takeHit() {
+        if (!isDestroyed()) {
+            currentHits++;
+        }
+    }
+    
+    float getHealthPercentage() const {
+        return 1.0f - (static_cast<float>(currentHits) / static_cast<float>(maxHits));
+    }
+};
+
