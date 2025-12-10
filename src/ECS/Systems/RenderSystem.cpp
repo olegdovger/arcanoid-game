@@ -37,6 +37,20 @@ void RenderSystem::update(float deltaTime, ECSManager& ecs)
             rect.setSize({shape->rectangle.width, shape->rectangle.height});
             rect.setPosition(position->position);
             rect.setFillColor(shape->color);
+
+            auto destructible = ecs.getComponent<DestructibleComponent>(entity);
+            if (destructible && destructible->maxHits > 1) {
+
+                rect.setOutlineColor(sf::Color::White);
+                rect.setOutlineThickness(1.0f * destructible->getHealthPercentage());
+
+                if (!destructible->isDestroyed() && destructible->currentHits > 0) {
+                    float damageRatio = static_cast<float>(destructible->currentHits) / static_cast<float>(destructible->maxHits);
+                    rect.setOutlineColor(sf::Color(255, 255, 255, 255 * damageRatio));
+                    rect.setOutlineThickness(2.0f);
+                }
+            }
+            
             window->draw(rect);
         }
         else if (shape->type == ShapeComponent::Type::Circle)

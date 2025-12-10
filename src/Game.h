@@ -35,6 +35,7 @@ private:
     void resetGame();
     void exitToMenu();
     void initializeGameObjects();
+    void recreateBricks();
 
     sf::RenderWindow window;
     ECSManager ecs;

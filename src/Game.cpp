@@ -1,4 +1,5 @@
 #include <cmath>
+#include <random>
 #include <stdexcept>
 
 #include "ECS/Components.h"
@@ -118,9 +119,11 @@ void Game::run() {
           ballSpeedSystem->reset();
         }
 
+        recreateBricks();
+
         isRestarting = false;
       } else {
-        // During pause, skip game updates but still render
+
         deltaTime = 0.0f;
       }
     }
@@ -254,7 +257,15 @@ void Game::initializeGameObjects() {
                                    GameState::BALL_START_Y,
                                    GameState::BALL_RADIUS);
 
-  // Create bricks
+  recreateBricks();
+}
+
+void Game::recreateBricks() {
+  for (Entity brick : bricks) {
+    ecs.destroyEntity(brick);
+  }
+  bricks.clear();
+
   const float brickWidth = 80.0f;
   const float brickHeight = 30.0f;
   const float brickSpacing = 5.0f;
@@ -271,8 +282,13 @@ void Game::initializeGameObjects() {
     for (int col = 0; col < cols; ++col) {
       float x = startX + col * (brickWidth + brickSpacing);
       float y = startY + row * (brickHeight + brickSpacing);
+      
+      static std::random_device rd;
+      static std::mt19937 gen(rd());
+      static std::uniform_int_distribution<int> dis(1, 3);
+      int hitPoints = dis(gen);
       Entity brick = EntityFactory::createBrick(
-          ecs, x, y, brickWidth, brickHeight, brickColors[row % 5]);
+          ecs, x, y, brickWidth, brickHeight, brickColors[row % 5], hitPoints);
       bricks.push_back(brick);
     }
   }
