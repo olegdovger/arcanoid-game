@@ -50,7 +50,7 @@ Entity EntityFactory::createBrick(ECSManager& ecs, float x, float y, float width
     ecs.getComponent<ShapeComponent>(entity)->rectangle.height = height;
     ecs.addComponent<ColliderComponent>(entity, std::make_shared<ColliderComponent>(
         ColliderComponent::Type::Brick, width, height));
-    ecs.addComponent<DestructibleComponent>(entity, std::make_shared<DestructibleComponent>(hitPoints));
+    ecs.addComponent<DurableBrick>(entity, std::make_shared<DurableBrick>(hitPoints));
 
     return entity;
 }

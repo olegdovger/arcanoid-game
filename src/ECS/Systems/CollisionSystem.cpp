@@ -199,13 +199,13 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
                             }
 
 
-                            auto destructible = ecs.getComponent<DestructibleComponent>(entity);
-                            if (destructible) {
-                                destructible->takeHit();
+                            auto durableBrick = ecs.getComponent<DurableBrick>(entity);
+                            if (durableBrick) {
+                                durableBrick->takeHit();
 
                                 auto shape = ecs.getComponent<ShapeComponent>(entity);
                                 if (shape) {
-                                    float healthPercentage = destructible->getHealthPercentage();
+                                    float healthPercentage = durableBrick->getHealthPercentage();
                                     sf::Color originalColor = shape->color;
 
                                     shape->color = sf::Color(
@@ -215,7 +215,7 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
                                     );
                                 }
 
-                                if (destructible->isDestroyed()) {
+                                if (durableBrick->isDestroyed()) {
                                     bricksToDestroy.push_back(entity);
                                 }
                             } else {

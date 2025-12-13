@@ -38,14 +38,15 @@ void RenderSystem::update(float deltaTime, ECSManager& ecs)
             rect.setPosition(position->position);
             rect.setFillColor(shape->color);
 
-            auto destructible = ecs.getComponent<DestructibleComponent>(entity);
-            if (destructible && destructible->maxHits > 1) {
+            auto durableBrick = ecs.getComponent<DurableBrick>(entity);
+
+            if (durableBrick && durableBrick->maxHits > 1) {
 
                 rect.setOutlineColor(sf::Color::White);
-                rect.setOutlineThickness(1.0f * destructible->getHealthPercentage());
+                rect.setOutlineThickness(1.0f * durableBrick->getHealthPercentage());
 
-                if (!destructible->isDestroyed() && destructible->currentHits > 0) {
-                    float damageRatio = static_cast<float>(destructible->currentHits) / static_cast<float>(destructible->maxHits);
+                if (!durableBrick->isDestroyed() && durableBrick->currentHits > 0) {
+                    float damageRatio = static_cast<float>(durableBrick->currentHits) / static_cast<float>(durableBrick->maxHits);
                     rect.setOutlineColor(sf::Color(255, 255, 255, 255 * damageRatio));
                     rect.setOutlineThickness(2.0f);
                 }
