@@ -27,7 +27,7 @@ Entity EntityFactory::createBall(ECSManager& ecs, float x, float y, float radius
 
     // Add components
     ecs.addComponent<PositionComponent>(entity, std::make_shared<PositionComponent>(x, y));
-    ecs.addComponent<VelocityComponent>(entity, std::make_shared<VelocityComponent>(GameState::BALL_INITIAL_VELOCITY_X, GameState::BALL_INITIAL_VELOCITY_Y, 0.0f));
+    ecs.addComponent<VelocityComponent>(entity, std::make_shared<VelocityComponent>(GAME_STATE.BALL_INITIAL_VELOCITY_X, GAME_STATE.BALL_INITIAL_VELOCITY_Y, 0.0f));
     ecs.addComponent<ShapeComponent>(entity, std::make_shared<ShapeComponent>(
         ShapeComponent::Type::Circle, sf::Color::Green));
     ecs.getComponent<ShapeComponent>(entity)->circle.radius = radius;
@@ -50,7 +50,7 @@ Entity EntityFactory::createBrick(ECSManager& ecs, float x, float y, float width
     ecs.getComponent<ShapeComponent>(entity)->rectangle.height = height;
     ecs.addComponent<ColliderComponent>(entity, std::make_shared<ColliderComponent>(
         ColliderComponent::Type::Brick, width, height));
-    ecs.addComponent<DestructibleComponent>(entity, std::make_shared<DestructibleComponent>(hitPoints));
+    ecs.addComponent<DurableBrick>(entity, std::make_shared<DurableBrick>(hitPoints));
 
     return entity;
 }

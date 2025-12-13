@@ -16,8 +16,8 @@ void RenderSystem::update(float deltaTime, ECSManager& ecs)
 
     // Ensure view is set correctly (fixed size to prevent stretching)
     sf::View view;
-    view.setSize({static_cast<float>(GameState::WINDOW_WIDTH), static_cast<float>(GameState::WINDOW_HEIGHT)});
-    view.setCenter({static_cast<float>(GameState::WINDOW_WIDTH) / 2.0f, static_cast<float>(GameState::WINDOW_HEIGHT) / 2.0f});
+    view.setSize({static_cast<float>(GAME_STATE.WINDOW_WIDTH), static_cast<float>(GAME_STATE.WINDOW_HEIGHT)});
+    view.setCenter({static_cast<float>(GAME_STATE.WINDOW_WIDTH) / 2.0f, static_cast<float>(GAME_STATE.WINDOW_HEIGHT) / 2.0f});
     window->setView(view);
 
     // Get all entities with Position and Shape components
@@ -38,19 +38,20 @@ void RenderSystem::update(float deltaTime, ECSManager& ecs)
             rect.setPosition(position->position);
             rect.setFillColor(shape->color);
 
-            auto destructible = ecs.getComponent<DestructibleComponent>(entity);
-            if (destructible && destructible->maxHits > 1) {
+            auto durableBrick = ecs.getComponent<DurableBrick>(entity);
+
+            if (durableBrick && durableBrick->maxHits > 1) {
 
                 rect.setOutlineColor(sf::Color::White);
-                rect.setOutlineThickness(1.0f * destructible->getHealthPercentage());
+                rect.setOutlineThickness(1.0f * durableBrick->getHealthPercentage());
 
-                if (!destructible->isDestroyed() && destructible->currentHits > 0) {
-                    float damageRatio = static_cast<float>(destructible->currentHits) / static_cast<float>(destructible->maxHits);
+                if (!durableBrick->isDestroyed() && durableBrick->currentHits > 0) {
+                    float damageRatio = static_cast<float>(durableBrick->currentHits) / static_cast<float>(durableBrick->maxHits);
                     rect.setOutlineColor(sf::Color(255, 255, 255, 255 * damageRatio));
                     rect.setOutlineThickness(2.0f);
                 }
             }
-            
+
             window->draw(rect);
         }
         else if (shape->type == ShapeComponent::Type::Circle)
@@ -65,4 +66,3 @@ void RenderSystem::update(float deltaTime, ECSManager& ecs)
         }
     }
 }
-

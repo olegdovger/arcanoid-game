@@ -2,36 +2,47 @@
 
 #include <SFML/Graphics.hpp>
 
-struct GameState
+class GameState
 {
+private:
+    GameState() = default;
+
+public:
+    static GameState& Instance() {
+      static GameState instance;
+      return instance;
+    }
+
     // Window settings
-    static constexpr unsigned int WINDOW_WIDTH = 800;
-    static constexpr unsigned int WINDOW_HEIGHT = 600;
-    static constexpr const char* WINDOW_TITLE = "Arcanoid Game";
+    const unsigned int WINDOW_WIDTH = 800;
+    const unsigned int WINDOW_HEIGHT = 600;
+    const char* WINDOW_TITLE = "Arcanoid Game";
 
     // FPS settings
-    static constexpr unsigned int TARGET_FPS = 60;
-    static constexpr float FRAME_TIME = 1.0f / TARGET_FPS;
+    const unsigned int TARGET_FPS = 60;
+    const float FRAME_TIME = 1.0f / TARGET_FPS;
 
     // Game constants
-    static constexpr float RESTART_PAUSE_TIME_SECONDS = 1.0f;
+    const float RESTART_PAUSE_TIME_SECONDS = 1.0f;
     // Initial positions
-    static constexpr float PLATFORM_START_X = 350.0f;
-    static constexpr float PLATFORM_START_Y = 550.0f;
-    static constexpr float BALL_START_X = 400.0f;
-    static constexpr float BALL_START_Y = 400.0f;
+    const float PLATFORM_START_X = 350.0f;
+    const float PLATFORM_START_Y = 550.0f;
+    const float BALL_START_X = 400.0f;
+    const float BALL_START_Y = 400.0f;
 
     // Platform settings
-    static constexpr float PLATFORM_WIDTH = 100.0f;
-    static constexpr float PLATFORM_HEIGHT = 20.0f;
+    const float PLATFORM_WIDTH = 100.0f;
+    const float PLATFORM_HEIGHT = 20.0f;
 
     // Ball settings
-    static constexpr float BALL_RADIUS = 10.0f;
-    static constexpr float BALL_INITIAL_VELOCITY_X = 200.0f;
-    static constexpr float BALL_INITIAL_VELOCITY_Y = -200.0f;
+    const float BALL_RADIUS = 10.0f;
+    const float BALL_INITIAL_VELOCITY_X = 200.0f;
+    const float BALL_INITIAL_VELOCITY_Y = -200.0f;
 
     // Ball speed increase settings
-    static constexpr float BALL_SPEED_INCREASE_INTERVAL = 10.0f; // Increase speed every 10 seconds
-    static constexpr float BALL_SPEED_MULTIPLIER = 1.2f; // Multiply speed by this factor
-    static constexpr float BALL_MAX_SPEED_MULTIPLIER = 3.0f; // Maximum speed multiplier
+    const float BALL_SPEED_INCREASE_INTERVAL = 10.0f; // Increase speed every 10 seconds
+    const float BALL_SPEED_MULTIPLIER = 1.2f; // Multiply speed by this factor
+    const float BALL_MAX_SPEED_MULTIPLIER = 3.0f; // Maximum speed multiplier
 };
+
+#define GAME_STATE GameState::Instance()
