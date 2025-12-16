@@ -1,0 +1,65 @@
+---
+config:
+  theme: neo-dark
+  look: neo
+  layout: elk
+---
+classDiagram
+direction TB
+    class ATM {
+	    -currentState : ScreenState
+	    +saveState() : ATMMemento
+	    +restoreState(memento: ATMMemento) : void
+    }
+
+    class ATMMemento {
+	    -stateId : String
+	    +getStateId() : String
+    }
+
+    class Caretaker {
+	    -history Stack~ATMMemento~
+	    +push(memento: ATMMemento) : void
+	    +pop() : ATMMemento
+    }
+
+    class ScreenState {
+	    &lt;&gt; +display() : void
+	    &lt;&gt; +handleInput() : void
+    }
+
+    class MainScreen {
+	    +display() : void
+	    +handleInput() : void
+    }
+
+    class WithdrawalScreen {
+	    +display() : void
+	    +handleInput() : void
+    }
+
+    class PaymentScreen {
+	    +display() : void
+	    +handleInput() : void
+    }
+
+    class AuthenticationScreen {
+	    +display() : void
+	    +handleInput() : void
+    }
+
+    class AdsScreen {
+	    +display() : void
+	    +handleInput() : void
+    }
+
+	<<interface>> ScreenState
+
+    ATM --> ATMMemento : Originator -> Memento
+    Caretaker o-- ATMMemento : Stores/Manages Mementos
+    ATM "1" *-- "1" ScreenState : uses State
+    ScreenState <|.. MainScreen
+    ScreenState <|.. WithdrawalScreen
+    ScreenState <|.. PaymentScreen
+    ScreenState <|.. AuthenticationScreen
+    ScreenState <|.. AdsScreen
