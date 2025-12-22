@@ -19,12 +19,12 @@ void ResizeSystem::update(float deltaTime, ECSManager& ecs)
     unsigned int currentWidth = window->getSize().x;
     unsigned int currentHeight = window->getSize().y;
 
-    // Check if window size has changed
-    // Note: Visual scaling is handled by RenderSystem automatically
-    // Physics uses fixed dimensions (800x600) from GameState
+    
+    
+    
     if (currentWidth != lastWidth || currentHeight != lastHeight)
     {
-        // Update stored size
+        
         lastWidth = currentWidth;
         lastHeight = currentHeight;
     }

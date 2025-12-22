@@ -5,10 +5,125 @@
 #include "../../GameState.h"
 #include <cstdint>
 #include <cmath>
+#include <cstdio>
+
+namespace {
+void applyBonus(ECSManager& ecs, Entity targetEntity, BonusType type, float duration) {
+    
+    auto existing = ecs.getComponent<ActiveBonusComponent>(targetEntity);
+    if (existing) {
+        if (existing->type == type) {
+            
+            existing->remainingTime = duration;
+            return;
+        } else {
+            
+            switch (existing->type) {
+                case BonusType::SlowBall: {
+                    auto velocity = ecs.getComponent<VelocityComponent>(targetEntity);
+                    if (velocity) {
+                        velocity->speed = existing->originalValue;
+                        
+                        float currentSpeed = std::sqrt(velocity->velocity.x * velocity->velocity.x + velocity->velocity.y * velocity->velocity.y);
+                        if (currentSpeed > 0.0f) {
+                            velocity->velocity = velocity->velocity * (velocity->speed / currentSpeed);
+                        }
+                    }
+                    break;
+                }
+                case BonusType::FastPlatform: {
+                    auto input = ecs.getComponent<InputComponent>(targetEntity);
+                    if (input) input->moveSpeed = existing->originalValue;
+                    break;
+                }
+                case BonusType::BigPlatform: {
+                    auto shape = ecs.getComponent<ShapeComponent>(targetEntity);
+                    auto position = ecs.getComponent<PositionComponent>(targetEntity);
+                    if (shape && shape->type == ShapeComponent::Type::Rectangle) {
+                        shape->rectangle.width = existing->originalValue;
+                        if (auto collider = ecs.getComponent<ColliderComponent>(targetEntity)) {
+                            collider->size.x = existing->originalValue;
+                        }
+                        
+                        if (position) {
+                            float newWidth = existing->originalValue;
+                            if (position->position.x < 0.0f) {
+                                position->position.x = 0.0f;
+                            }
+                            if (position->position.x + newWidth > static_cast<float>(GAME_STATE.WINDOW_WIDTH)) {
+                                position->position.x = static_cast<float>(GAME_STATE.WINDOW_WIDTH) - newWidth;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            ecs.removeComponent<ActiveBonusComponent>(targetEntity);
+        }
+    }
+    
+    
+    float originalValue = 0.0f;
+    switch (type) {
+        case BonusType::SlowBall: {
+            auto velocity = ecs.getComponent<VelocityComponent>(targetEntity);
+            if (velocity) {
+                originalValue = velocity->speed;
+                
+                velocity->speed *= 0.5f;
+                
+                float currentSpeed = std::sqrt(velocity->velocity.x * velocity->velocity.x + velocity->velocity.y * velocity->velocity.y);
+                if (currentSpeed > 0.0f) {
+                    velocity->velocity = velocity->velocity * (velocity->speed / currentSpeed);
+                }
+            }
+            break;
+        }
+        case BonusType::FastPlatform: {
+            auto input = ecs.getComponent<InputComponent>(targetEntity);
+            if (input) {
+                originalValue = input->moveSpeed;
+                
+                input->moveSpeed *= 1.5f;
+            }
+            break;
+        }
+        case BonusType::BigPlatform: {
+            auto shape = ecs.getComponent<ShapeComponent>(targetEntity);
+            auto position = ecs.getComponent<PositionComponent>(targetEntity);
+            if (shape && shape->type == ShapeComponent::Type::Rectangle) {
+                originalValue = shape->rectangle.width;
+                printf("[DEBUG] Applying BigPlatform bonus. Original width: %.1f\n", originalValue);
+                
+                shape->rectangle.width *= 1.5f;
+                printf("[DEBUG] New width: %.1f\n", shape->rectangle.width);
+                if (auto collider = ecs.getComponent<ColliderComponent>(targetEntity)) {
+                    collider->size.x = shape->rectangle.width;
+                }
+                
+                if (position) {
+                    float newWidth = shape->rectangle.width;
+                    if (position->position.x < 0.0f) {
+                        position->position.x = 0.0f;
+                    }
+                    if (position->position.x + newWidth > static_cast<float>(GAME_STATE.WINDOW_WIDTH)) {
+                        position->position.x = static_cast<float>(GAME_STATE.WINDOW_WIDTH) - newWidth;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    
+    
+    ecs.addComponent<ActiveBonusComponent>(targetEntity,
+        std::make_shared<ActiveBonusComponent>(type, duration, originalValue));
+}
+}
 
 void CollisionSystem::update(float deltaTime, ECSManager& ecs)
 {
-    // Get all entities with ColliderComponent
+    
     auto entities = ecs.getEntitiesWithComponent<ColliderComponent>();
 
     for (Entity entity : entities)
@@ -19,26 +134,26 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
 
         if (!collider || !position) continue;
 
-        // Handle wall collisions for balls
+        
         if (collider->type == ColliderComponent::Type::Ball && velocity)
         {
             float radius = collider->radius;
 
-            // Left wall
+            
             if (position->position.x - radius < 0.0f)
             {
                 position->position.x = radius;
                 velocity->velocity.x = -velocity->velocity.x;
             }
 
-            // Right wall
+            
             if (position->position.x + radius > static_cast<float>(GAME_STATE.WINDOW_WIDTH))
             {
                 position->position.x = static_cast<float>(GAME_STATE.WINDOW_WIDTH) - radius;
                 velocity->velocity.x = -velocity->velocity.x;
             }
 
-            // Top wall
+            
             if (position->position.y - radius < 0.0f)
             {
                 position->position.y = radius;
@@ -46,7 +161,7 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
             }
         }
 
-        // Handle platform bounds (keep platform within window)
+        
         if (collider->type == ColliderComponent::Type::Platform)
         {
             float platformWidth = collider->size.x;
@@ -57,7 +172,7 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
         }
     }
 
-    // Ball-Platform collision detection
+    
     Entity platformEntity = INVALID_ENTITY;
     Entity ballEntity = INVALID_ENTITY;
 
@@ -86,35 +201,35 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
             float ballRadius = ballCollider->radius;
             sf::Vector2f platformSize = platformCollider->size;
 
-            // AABB collision detection
+            
             bool colliding = (ballPos->position.x + ballRadius > platformPos->position.x &&
                              ballPos->position.x - ballRadius < platformPos->position.x + platformSize.x &&
                              ballPos->position.y + ballRadius > platformPos->position.y &&
                              ballPos->position.y - ballRadius < platformPos->position.y + platformSize.y);
 
-            if (colliding && ballVelocity->velocity.y > 0.0f) // Only if ball moving downward
+            if (colliding && ballVelocity->velocity.y > 0.0f) 
             {
-                // Reflect ball upward
+                
                 ballVelocity->velocity.y = -std::abs(ballVelocity->velocity.y);
 
-                // Calculate collision point relative to platform center
-                // Add defensive check to prevent division by zero
+                
+                
                 if (platformSize.x > 0.0f)
                 {
                     float platformCenterX = platformPos->position.x + platformSize.x / 2.0f;
                     float ballCenterX = ballPos->position.x;
                     float relativeIntersectX = (ballCenterX - platformCenterX) / (platformSize.x / 2.0f);
 
-                    // Add angle based on hit position
+                    
                     ballVelocity->velocity.x = relativeIntersectX * ballVelocity->speed * 0.5f;
                 }
                 else
                 {
-                    // If platform has zero width, just reflect vertically
+                    
                     ballVelocity->velocity.x = 0.0f;
                 }
 
-                // Normalize velocity to maintain speed
+                
                 float currentSpeed = std::sqrt(ballVelocity->velocity.x * ballVelocity->velocity.x +
                                               ballVelocity->velocity.y * ballVelocity->velocity.y);
                 if (currentSpeed > 0.0f)
@@ -122,7 +237,7 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
                     ballVelocity->velocity = ballVelocity->velocity * (ballVelocity->speed / currentSpeed);
                 }
 
-                // Move ball above platform
+                
                 ballPos->position.y = platformPos->position.y - ballRadius;
             }
         }
@@ -216,9 +331,61 @@ void CollisionSystem::update(float deltaTime, ECSManager& ecs)
                                 }
 
                                 if (durableBrick->isDestroyed()) {
+                                    GAME_STATE.addScore(durableBrick->maxHits * 10);
+                                    
+                                    auto bonus = ecs.getComponent<BonusComponent>(entity);
+                                    if (bonus && !bonus->collected) {
+                                        bonus->collected = true;
+                                        
+                                        Entity targetEntity = INVALID_ENTITY;
+                                        float duration = 0.0f;
+                                        switch (bonus->type) {
+                                            case BonusType::SlowBall:
+                                                targetEntity = ballEntity;
+                                                duration = GAME_STATE.SLOW_BALL_DURATION;
+                                                break;
+                                            case BonusType::FastPlatform:
+                                                targetEntity = platformEntity;
+                                                duration = GAME_STATE.FAST_PLATFORM_DURATION;
+                                                break;
+                                            case BonusType::BigPlatform:
+                                                targetEntity = platformEntity;
+                                                duration = GAME_STATE.BIG_PLATFORM_DURATION;
+                                                break;
+                                        }
+                                        if (targetEntity != INVALID_ENTITY) {
+                                            applyBonus(ecs, targetEntity, bonus->type, duration);
+                                        }
+                                    }
                                     bricksToDestroy.push_back(entity);
                                 }
                             } else {
+                                GAME_STATE.addScore(10);
+                                
+                                auto bonus = ecs.getComponent<BonusComponent>(entity);
+                                if (bonus && !bonus->collected) {
+                                    bonus->collected = true;
+                                    
+                                    Entity targetEntity = INVALID_ENTITY;
+                                    float duration = 0.0f;
+                                    switch (bonus->type) {
+                                        case BonusType::SlowBall:
+                                            targetEntity = ballEntity;
+                                            duration = GAME_STATE.SLOW_BALL_DURATION;
+                                            break;
+                                        case BonusType::FastPlatform:
+                                            targetEntity = platformEntity;
+                                            duration = GAME_STATE.FAST_PLATFORM_DURATION;
+                                            break;
+                                        case BonusType::BigPlatform:
+                                            targetEntity = platformEntity;
+                                            duration = GAME_STATE.BIG_PLATFORM_DURATION;
+                                            break;
+                                    }
+                                    if (targetEntity != INVALID_ENTITY) {
+                                        applyBonus(ecs, targetEntity, bonus->type, duration);
+                                    }
+                                }
                                 bricksToDestroy.push_back(entity);
                             }
                         }

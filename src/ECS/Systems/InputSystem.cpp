@@ -5,7 +5,7 @@
 
 void InputSystem::update(float deltaTime, ECSManager& ecs)
 {
-    // Get all entities with InputComponent
+    
     auto entities = ecs.getEntitiesWithComponent<InputComponent>();
 
     for (Entity entity : entities)
@@ -13,7 +13,7 @@ void InputSystem::update(float deltaTime, ECSManager& ecs)
         auto input = ecs.getComponent<InputComponent>(entity);
         if (!input) continue;
 
-        // Check keyboard state
+        
         input->leftPressed = (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
                              sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left));
         input->rightPressed = (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
