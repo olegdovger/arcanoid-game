@@ -1,0 +1,26 @@
+---
+config:
+  layout: elk
+---
+classDiagram
+    class CanvasMemento {
+        -state
+        +getState()
+    }
+
+    class Canvas {
+        -state
+        +createMemento()
+        +restore(memento)
+    }
+
+    class HistoryChangesManager {
+        -history
+        +save(memento)
+        +undo()
+        +redo()
+    }
+
+    Canvas ..> CanvasMemento : creates
+    Canvas ..> CanvasMemento : restores
+    HistoryChangesManager o-- CanvasMemento : stores

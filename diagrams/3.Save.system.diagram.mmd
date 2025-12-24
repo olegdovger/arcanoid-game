@@ -1,0 +1,83 @@
+classDiagram
+    direction TB
+
+    %% GAME STATE
+    class GameState {
+        <<Singleton>>
+        -int currentScore
+        -std::vector~int~ highScores
+        +Instance() GameState&
+        +addScore(int points)
+        +resetCurrentScore()
+        +getCurrentScore() int
+        +addHighScore(int score)
+        +getHighScores() const std::vector~int~&
+        +submitCurrentScore()
+        +loadHighScores(filename)
+        +saveHighScores(filename)
+    }
+
+    %% BASE COMPONENT
+    class Component {
+        <<Abstract>>
+    }
+
+    %% SAVE SYSTEM
+    class SaveSystem {
+        <<Static>>
+        +saveGame(const Game&, filename) bool
+        +loadGame(Game&, filename) bool
+        +saveExists(filename) bool
+    }
+
+    class GameSaveData {
+        +int currentScore
+        +std::vector~BrickSaveData~ bricks
+        +float platformX, platformY
+        +float ballX, ballY
+        +float ballVelX, ballVelY
+        +std::uint64_t saveTime
+    }
+
+    %% SYSTEMS
+    class CollisionSystem {
+        +update(float deltaTime, ECSManager&)
+    }
+
+    class Game {
+        +run()
+        +render()
+        +renderScore()
+        +renderVictoryScreen()
+        -update(float deltaTime)
+        -resetGame()
+    }
+
+    class RenderSystem {
+        +update(float deltaTime, ECSManager&)
+    }
+
+    class DurableBrick {
+        +int maxHits
+        +int currentHits
+        +isDestroyed() bool
+        +takeHit()
+    }
+
+    %% INHERITANCE
+    Component <|-- DurableBrick
+
+    %% RELATIONSHIPS
+    CollisionSystem ..> GameState : adds score on brick destruction
+    CollisionSystem ..> DurableBrick : reads maxHits for score calculation
+
+    Game ..> GameState : submits score on victory
+    Game ..> GameState : resets score on game reset
+    Game ..> GameState : reads current score for display
+    Game ..> GameState : reads high scores for victory screen
+
+    SaveSystem ..> GameState : reads/writes scores
+    SaveSystem ..> Game : saves/loads game data
+    SaveSystem ..> GameSaveData : serializes/deserializes
+
+    RenderSystem ..> GameState : reads currentScore for rendering
