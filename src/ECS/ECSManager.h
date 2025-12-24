@@ -11,12 +11,12 @@
 class ECSManager
 {
 public:
-    // Entity management
+    
     Entity createEntity();
     void destroyEntity(Entity entity);
     bool isValid(Entity entity) const;
 
-    // Component management
+    
     template<typename T>
     void addComponent(Entity entity, std::shared_ptr<T> component)
     {
@@ -44,6 +44,22 @@ public:
     }
 
     template<typename T>
+    std::shared_ptr<const T> getComponent(Entity entity) const
+    {
+        static_assert(std::is_base_of_v<Component, T>, "T must inherit from Component");
+        auto it = components.find(std::type_index(typeid(T)));
+        if (it != components.end())
+        {
+            auto entityIt = it->second.find(entity);
+            if (entityIt != it->second.end())
+            {
+                return std::static_pointer_cast<const T>(entityIt->second);
+            }
+        }
+        return nullptr;
+    }
+
+    template<typename T>
     bool hasComponent(Entity entity)
     {
         static_assert(std::is_base_of_v<Component, T>, "T must inherit from Component");
@@ -64,7 +80,7 @@ public:
         return entities;
     }
 
-    // System management
+    
     void addSystem(std::shared_ptr<System> system);
     void updateSystems(float deltaTime);
 

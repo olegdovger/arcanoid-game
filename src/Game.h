@@ -21,9 +21,17 @@ class Game
 {
 public:
     Game();
-    ~Game() = default;
+    ~Game();
 
     void run();
+    
+    
+    Entity getPlatform() const { return platform; }
+    Entity getBall() const { return ball; }
+    const std::vector<Entity>& getBricks() const { return bricks; }
+    std::vector<Entity>& getBricks() { return bricks; }
+    ECSManager& getECS() { return ecs; }
+    const ECSManager& getECS() const { return ecs; }
 
 private:
     void handleEvents();
@@ -31,11 +39,14 @@ private:
     void render();
     void renderVictoryScreen();
     void renderMainMenuScreen();
+    void renderScore();
     int countRemainingBricks();
     void resetGame();
     void exitToMenu();
     void initializeGameObjects();
     void recreateBricks();
+    void updateBonuses(float deltaTime);
+    void renderBonusTimers();
 
     sf::RenderWindow window;
     ECSManager ecs;
@@ -55,6 +66,6 @@ private:
     sf::Clock restartTimer;
     bool isRestarting = false;
     GameMode gameMode = GameMode::MainMenu;
-    bool victoryChoiceYes = true; // true = да, false = нет
+    bool victoryChoiceYes = true; 
     sf::Font font;
 };

@@ -1,0 +1,78 @@
+classDiagram
+    direction TB
+
+    %% BONUS TYPE
+    class BonusType {
+        <<enumeration>>
+        SlowBall
+        FastPlatform
+        BigPlatform
+    }
+
+    %% BASE COMPONENT
+    class Component {
+        <<Abstract>>
+    }
+
+    %% COMPONENTS
+    class BonusComponent {
+        +BonusType type
+        +bool collected
+    }
+
+    class ActiveBonusComponent {
+        +BonusType type
+        +float remainingTime
+        +float originalValue
+    }
+
+    class VelocityComponent {
+        +sf::Vector2f velocity
+        +float speed
+    }
+
+    %% GAME STATE
+    class GameState {
+        <<Singleton>>
+        +const float SLOW_BALL_DURATION
+    }
+
+    %% SYSTEMS
+    class CollisionSystem {
+        +update()
+        -applyBonus()
+    }
+
+    class BallSpeedSystem {
+        +update()
+    }
+
+    class Game {
+        -updateBonuses()
+    }
+
+    class RenderSystem {
+        +update()
+    }
+
+    %% INHERITANCE
+    Component <|-- BonusComponent
+    Component <|-- ActiveBonusComponent
+    Component <|-- VelocityComponent
+
+    %% RELATIONSHIPS
+    CollisionSystem ..> BonusType : reads SlowBall
+    CollisionSystem ..> ActiveBonusComponent : creates on Ball
+    CollisionSystem ..> VelocityComponent : reduces speed by 50%
+    CollisionSystem ..> GameState : reads duration
+
+    BallSpeedSystem ..> ActiveBonusComponent : checks for SlowBall
+    BallSpeedSystem ..> VelocityComponent : manages speed
+    BallSpeedSystem ..> BonusType : identifies bonus
+
+    Game ..> ActiveBonusComponent : updates remainingTime
+    Game ..> VelocityComponent : restores original speed
+    Game ..> BonusType : identifies bonus type
+
+    RenderSystem ..> ActiveBonusComponent : shows timer (Red)
+    RenderSystem ..> BonusComponent : shows indicator (Red)

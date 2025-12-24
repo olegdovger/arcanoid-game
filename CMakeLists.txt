@@ -116,6 +116,7 @@ add_executable(${PROJECT_NAME}
     src/ECS/Systems/RenderSystem.cpp
     src/ECS/Systems/ResizeSystem.cpp
     src/EntityFactory.cpp
+    src/SaveSystem.cpp
 )
 
 # Link SFML libraries

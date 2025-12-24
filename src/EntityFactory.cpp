@@ -7,7 +7,7 @@ Entity EntityFactory::createPlatform(ECSManager& ecs, float x, float y, float wi
 {
     Entity entity = ecs.createEntity();
 
-    // Add components
+    
     ecs.addComponent<PositionComponent>(entity, std::make_shared<PositionComponent>(x, y));
     ecs.addComponent<VelocityComponent>(entity, std::make_shared<VelocityComponent>(0.0f, 0.0f, 0.0f));
     ecs.addComponent<ShapeComponent>(entity, std::make_shared<ShapeComponent>(
@@ -25,7 +25,7 @@ Entity EntityFactory::createBall(ECSManager& ecs, float x, float y, float radius
 {
     Entity entity = ecs.createEntity();
 
-    // Add components
+    
     ecs.addComponent<PositionComponent>(entity, std::make_shared<PositionComponent>(x, y));
     ecs.addComponent<VelocityComponent>(entity, std::make_shared<VelocityComponent>(GAME_STATE.BALL_INITIAL_VELOCITY_X, GAME_STATE.BALL_INITIAL_VELOCITY_Y, 0.0f));
     ecs.addComponent<ShapeComponent>(entity, std::make_shared<ShapeComponent>(
@@ -37,11 +37,11 @@ Entity EntityFactory::createBall(ECSManager& ecs, float x, float y, float radius
     return entity;
 }
 
-Entity EntityFactory::createBrick(ECSManager& ecs, float x, float y, float width, float height, sf::Color color, int hitPoints)
+Entity EntityFactory::createBrick(ECSManager& ecs, float x, float y, float width, float height, sf::Color color, int hitPoints, bool hasBonus, BonusType bonusType)
 {
     Entity entity = ecs.createEntity();
 
-    // Add components
+    
     ecs.addComponent<PositionComponent>(entity, std::make_shared<PositionComponent>(x, y));
     ecs.addComponent<VelocityComponent>(entity, std::make_shared<VelocityComponent>(0.0f, 0.0f, 0.0f));
     ecs.addComponent<ShapeComponent>(entity, std::make_shared<ShapeComponent>(
@@ -51,6 +51,12 @@ Entity EntityFactory::createBrick(ECSManager& ecs, float x, float y, float width
     ecs.addComponent<ColliderComponent>(entity, std::make_shared<ColliderComponent>(
         ColliderComponent::Type::Brick, width, height));
     ecs.addComponent<DurableBrick>(entity, std::make_shared<DurableBrick>(hitPoints));
+
+    
+    if (hasBonus)
+    {
+        ecs.addComponent<BonusComponent>(entity, std::make_shared<BonusComponent>(bonusType));
+    }
 
     return entity;
 }

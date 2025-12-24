@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <cmath>
 
-// Position component
+
 struct PositionComponent : public Component
 {
     sf::Vector2f position;
@@ -12,7 +12,7 @@ struct PositionComponent : public Component
     PositionComponent(float x = 0.0f, float y = 0.0f) : position(x, y) {}
 };
 
-// Velocity component
+
 struct VelocityComponent : public Component
 {
     sf::Vector2f velocity;
@@ -28,7 +28,7 @@ struct VelocityComponent : public Component
     }
 };
 
-// Shape component for rendering
+
 struct ShapeComponent : public Component
 {
     enum class Type
@@ -59,7 +59,7 @@ struct ShapeComponent : public Component
     }
 };
 
-// Collider component
+
 struct ColliderComponent : public Component
 {
     enum class Type
@@ -71,8 +71,8 @@ struct ColliderComponent : public Component
     };
 
     Type type;
-    float radius; // For circle colliders
-    sf::Vector2f size; // For rectangle colliders
+    float radius; 
+    sf::Vector2f size; 
 
     ColliderComponent(Type t, float r = 0.0f)
         : type(t), radius(r), size(0.0f, 0.0f) {}
@@ -81,7 +81,7 @@ struct ColliderComponent : public Component
         : type(t), radius(0.0f), size(w, h) {}
 };
 
-// Input component (for entities that respond to input)
+
 struct InputComponent : public Component
 {
     bool leftPressed = false;
@@ -109,4 +109,32 @@ struct DurableBrick : public Component
     float getHealthPercentage() const {
         return 1.0f - (static_cast<float>(currentHits) / static_cast<float>(maxHits));
     }
+};
+
+
+enum class BonusType
+{
+    SlowBall,      
+    FastPlatform,  
+    BigPlatform    
+};
+
+
+struct BonusComponent : public Component
+{
+    BonusType type;
+    bool collected = false;
+    
+    BonusComponent(BonusType t = BonusType::SlowBall) : type(t) {}
+};
+
+
+struct ActiveBonusComponent : public Component
+{
+    BonusType type;
+    float remainingTime;
+    float originalValue; 
+    
+    ActiveBonusComponent(BonusType t, float time, float original = 0.0f)
+        : type(t), remainingTime(time), originalValue(original) {}
 };

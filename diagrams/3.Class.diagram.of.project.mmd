@@ -1,0 +1,87 @@
+classDiagram
+    direction TB
+
+    %% =============================================
+    %% BONUS TYPES
+    %% =============================================
+    class BonusType {
+        <<enumeration>>
+        SlowBall
+        FastPlatform
+        BigPlatform
+    }
+
+    %% =============================================
+    %% BASE COMPONENT
+    %% =============================================
+    class Component {
+        <<Abstract>>
+    }
+
+    %% =============================================
+    %% COMPONENTS
+    %% =============================================
+    class BonusComponent {
+        +BonusType type
+        +bool collected
+    }
+
+    class ActiveBonusComponent {
+        +BonusType type
+        +float remainingTime
+        +float originalValue
+    }
+
+    %% =============================================
+    %% GAME STATE
+    %% =============================================
+    class GameState {
+        <<Singleton>>
+        +BONUS_CHANCE
+        +BONUS_DURATIONS
+        +addScore()
+    }
+
+    %% =============================================
+    %% SYSTEMS AND FACTORY
+    %% =============================================
+    class EntityFactory {
+        +createBrick()
+    }
+
+    class CollisionSystem {
+        +update()
+        -detectBrickHit()
+        -collectBonus()
+    }
+
+    class Game {
+        -updateBonuses()
+        -renderBonusTimers()
+    }
+
+    class RenderSystem {
+        +update()
+    }
+
+    %% =============================================
+    %% INHERITANCE
+    %% =============================================
+    Component <|-- BonusComponent
+    Component <|-- ActiveBonusComponent
+
+    %% =============================================
+    %% RELATIONSHIPS
+    %% =============================================
+    EntityFactory ..> BonusComponent : adds to brick
+    EntityFactory ..> GameState : reads BONUS_CHANCE
+
+    CollisionSystem ..> BonusComponent : reads
+    CollisionSystem ..> ActiveBonusComponent : creates
+    CollisionSystem ..> GameState : adds score
+
+    Game ..> ActiveBonusComponent : updates timers
+    Game ..> GameState : reads constants
+
+    RenderSystem ..> BonusComponent : draws indicator
+    RenderSystem ..> ActiveBonusComponent : shows timer

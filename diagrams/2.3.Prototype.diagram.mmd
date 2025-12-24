@@ -1,0 +1,57 @@
+---
+config:
+  theme: neo-dark
+  look: neo
+  layout: elk
+---
+classDiagram
+direction TB
+
+    note "Prototype Pattern: Create new objects by cloning existing prototypes"
+    note "ShapeRegistry maintains a collection of prototype objects"
+
+    class Shape {
+        <<abstract>>
+        #~Shape() : virtual
+        +clone() unique_ptr~Shape~ : virtual pure
+        +draw() void : virtual pure
+    }
+
+    class Circle {
+        -radius : int
+        +Circle(int r = 0)
+        +clone() unique_ptr~Shape~ : override
+        +draw() void : override
+    }
+
+    class Rectangle {
+        -width : int
+        -height : int
+        +Rectangle(int w = 0, int h = 0)
+        +clone() unique_ptr~Shape~ : override
+        +setSize(int width, int height) void
+        +draw() void : override
+    }
+
+    class ShapeRegistry {
+        -prototypes : map~string, unique_ptr~Shape~~
+        +ShapeRegistry()
+        +createShape(const string& type) unique_ptr~Shape~
+    }
+
+    class Client {
+        +main() void
+        -uses ShapeRegistry to create shapes
+    }
+
+    Shape <|-- Circle : inheritance
+    Shape <|-- Rectangle : inheritance
+
+    ShapeRegistry "1" o-- "*" Shape : stores prototypes
+    ShapeRegistry ..> Shape : creates clones
+
+    Client ..> ShapeRegistry : uses
+    Client ..> Shape : manipulates
+
+    note for ShapeRegistry "Manages prototype objects\nKey-value store of shapes\ncreateShape() returns cloned instances"
+    note for Shape "Prototype interface\nclone() method implements the pattern"
